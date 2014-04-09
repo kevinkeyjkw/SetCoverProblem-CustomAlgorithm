@@ -18,32 +18,68 @@ def isSolution(a):
 def printSolution(a):
 	guessArray = [subsets[i] for i in range(len(a)) if a[i]]
 	print(guessArray)
-# 
-# We put a=[T,T,T...,T] -> a=[F,F,F,...] means no more moves left
-# def backtrack(a,k,n):
-# 	c = [0,0]
-# 	ncandidates=2
-# 	if(is_a_solution(a,k,n)):
-# 		process_solution(a,k)
-# 	else:
-# 		k += 1
-# 		if k < n:
-# 			construct_candidates(a,c)
-# 			for i in range(2):
-# 				a[k] = c[i]
-# 				backtrack(a,k,n)
 
+def computeIndexMustHaveSets(data,range):
+	minOcc = 999
+	minNum = range[0]
+	mustHaveSets = []
+	mustHaveIndex = []
+	for i in range:
+		occ = 0
+		sets = []
+		for k in data:
+			if i in k:
+				occ = occ + 1
+				sets.append(k)
+		if occ < minOcc:
+			minNum = i
+			minOcc = occ
+			mustHaveSets = sets
+	for i in mustHaveSets:
+		mustHaveIndex.append(data.index(i))
+	return mustHaveIndex
 
+def solutionContainsMustHaveSets(a):
+	for i in mustHaveIndex:
+		if a[i] == True:
+			return True
+	return False
 def combo(a,k):
 	if k == len(a):
 		if isSolution(a):
 			processSolution(a)
 	else:
-		a[k] = 0
-		combo(a,k+1)
-		a[k] = 1
-		combo(a,k+1)
-		
+		if k == mustHaveIndex[len(mustHaveIndex)-1] and not solutionContainsMustHaveSets(a):
+			a[k] = 1 
+			combo(a,k+1)
+		else:
+			a[k] = 0
+			combo(a,k+1)
+			a[k] = 1
+			combo(a,k+1)
+	
+def pruneExcessiveSets(a):
+	pdb.set_trace()
+	toRemove=[]
+	for i in range(len(a)):
+		for j in range(len(a)):
+			if a[i] <= a[j] and i != j:
+				toRemove.append(a[i])
+				break
+	for i in toRemove:
+		a.remove(i)
+
+def pruneExcessiveSets2(a):
+	x = len(a)
+	count = 0
+	while count < x:
+		for j in range(len(a)):
+			if a[count] <= a[j] and count != j:
+				a.remove(a[count])		
+				x -= 1
+				count -= 1
+				break
+		count += 1
 	
 def processSolution(a):
 	global minSolution
@@ -93,18 +129,26 @@ for x in range(1,int(content[0])+1):
 	numsToCover.append(x)
 content = content[2:]
 for element in content:
-	if element[len(element)-1] == ' ':
-		element = element[:len(element)-1]
-	if(' ' in element):
-		temp = [int(x) for x in element.split(' ')]
+	if element == '':
+		temp = []
 	else:
-		temp = [int(element)]
-	subsets.append(temp)
+		if element[len(element)-1] == ' ':
+			element = element[:len(element)-1]
+		if(' ' in element):
+			temp = [int(x) for x in element.split(' ')]
+		else:
+			temp = [int(element)]
+	subsets.append(set(temp))
 minSolution = subsets
+
+print('original subsets =',subsets)
+pruneExcessiveSets2(subsets)
 a = [0 for i in range(len(subsets))]
+print('new subsets =',subsets)
+mustHaveIndex = computeIndexMustHaveSets(subsets,numsToCover)
 
 combo(a,0)
-print(minSolution)
+print('Minimum cover set =',minSolution)
 #Example of variables/
 #subsets = [[1,2,3],[2,3],[3,4,5]]
 #numOfSubsets = 12
